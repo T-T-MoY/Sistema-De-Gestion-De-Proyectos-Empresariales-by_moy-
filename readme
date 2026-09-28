@@ -1,16 +1,268 @@
-Para iniciar el proyecto en consola ejecute:
+# ApexDev — Sistema de Gestión de Proyectos Empresariales
+
+Aplicación web para administrar proyectos, tareas, equipos, clientes, recursos materiales y reportes de una empresa de desarrollo. Maneja tres roles (**admin**, **gerente**, **empleado**), cada uno con su propio dashboard y permisos.
+
+---
+
+## 1. Stack tecnológico
+
+| Capa | Tecnología | Versión |
+|---|---|---|
+| Frontend | Vue 3 (Composition API) + Vue Router 4 | `vue ^3.5`, `vue-router ^4.6` |
+| Bundler / Dev server | Vite | `^8.0` |
+| Gráficos | Chart.js | `^4.5` |
+| Exportación | jsPDF + jsPDF-AutoTable (PDF), SheetJS `xlsx` (Excel) | `^4.2`, `^5.0`, `^0.18` |
+| Backend | Node.js + Express (API REST) | Node 18, `express ^4.19` |
+| Subida de archivos | Multer | `^1.4.5-lts.1` |
+| Hash / config | bcrypt, dotenv, cors | — |
+| Base de datos | PostgreSQL | 15 (alpine) |
+| Lógica en BD | Funciones, procedimientos, vistas y triggers en PL/pgSQL | — |
+| Infraestructura | Docker + Docker Compose | — |
+| Dev tooling | nodemon (backend con recarga en caliente) | `^3.1` |
+
+**Arquitectura:** SPA (Vue) → API REST (Express) → PostgreSQL. Gran parte de la lógica de negocio (dashboards, reportes, alertas, auditoría) vive en la base de datos como funciones/triggers.
+
+---
+
+## 2. Estructura del proyecto
+
+```
+Sistema_De_Gestion_De_Proyectos_Empresariales/
+├── docker-compose.yml          # Orquesta db + backend + frontend
+├── credenciales.txt            # Usuarios de prueba (solo desarrollo)
+├── README.md
+├── .env.example                # Plantilla de variables de entorno
+│
+├── backend/                    # API REST (Node + Express)
+│   ├── Dockerfile              # node:18-alpine
+│   ├── package.json
+│   ├── server.js               # Punto de entrada: middlewares + montaje de rutas
+│   ├── config/
+│   │   ├── db.js               # Pool de conexión a PostgreSQL (pg)
+│   │   ├── 01_init.sql         # Esquema (tablas) + datos semilla
+│   │   ├── 02_procesos.sql     # Funciones, SPs, vistas y triggers
+│   │   └── disable/            # Scripts antiguos (ignorados por Postgres)
+│   ├── controllers/            # Lógica de cada módulo
+│   ├── routes/                 # Definición de endpoints por módulo
+│   ├── models/                 # (vacío por ahora)
+│   └── uploads/                # Fotos de perfil (volumen persistente)
+│
+└── frontend/                   # SPA (Vue 3 + Vite)
+    ├── Dockerfile              # node:22-alpine
+    ├── package.json
+    ├── vite.config.js          # host: true, puerto 5173, polling para Docker
+    ├── index.html
+    ├── public/                 # Logos e íconos
+    └── src/
+        ├── main.js
+        ├── App.vue
+        ├── router/index.js     # Rutas + meta requiresAuth
+        ├── components/         # Sidebar.vue, Topbar.vue
+        ├── assets/css/style.css
+        └── views/              # Una vista por módulo (ver sección 6)
+```
+
+### Base de datos
+
+**Tablas** (`01_init.sql`): `USUARIO`, `CLIENTE`, `RECURSO_MATERIAL`, `PROYECTO`, `TAREA`, `ES_MIEMBRO`, `DEPENDE`, `REGISTRO_AVANCE`, `UTILIZA`, `COMENTARIO`, `NOTIFICACION`, `HISTORIAL_ESTADO`.
+
+**Lógica en BD** (`02_procesos.sql`):
+
+- Funciones: `fn_dashboard_admin`, `fn_dashboard_gerente`, `fn_dashboard_empleado`, `fn_obtener_proyectos`, `fn_obtener_equipo_proyecto`, `sp_reporte_costos`, `sp_reporte_avance_general`, `fn_reporte_nomina_proyecto`, `fn_reporte_nomina_global`
+- Procedimiento: `sp_crear_proyecto`
+- Vistas: `vw_reporte_financiero`, `vw_reporte_cronograma_tareas`
+- Triggers: sincronización de avance de tarea, auditoría de cambios de estado, alerta de presupuesto, alerta de retraso, control de sobreasignación de horas, notificación al asignar a un proyecto
+
+---
+
+## 3. Requisitos previos
+
+**Opción recomendada (Docker):**
+
+- [Docker](https://docs.docker.com/get-docker/) 20+ y Docker Compose v2
+- Git
+
+**Opción manual (sin Docker):**
+
+- Node.js **22.12+** para el frontend (Vite 8 lo requiere) y Node 18+ para el backend
+- PostgreSQL 15
+- npm
+
+---
+
+## 4. Cómo iniciar el proyecto
+
+### Con Docker (recomendado)
+
+```bash
+# 1. Clonar el repositorio
+git clone <URL_DEL_REPO>
+cd Sistema_De_Gestion_De_Proyectos_Empresariales
+
+# 2. (Opcional) Crear el archivo de entorno
+cp .env.example backend/.env
+
+# 3. Levantar todo
 docker compose up -d --build
+```
 
+Servicios disponibles al terminar:
 
-.env
-'''
-# Configuración del Servidor
+| Servicio | URL / Puerto | Contenedor |
+|---|---|---|
+| Frontend (Vue) | http://localhost:5173 | `apexdev_frontend` |
+| Backend (API) | http://localhost:3000 | `apexdev_backend` |
+| Verificar API + BD | http://localhost:3000/api/test-db | — |
+| PostgreSQL | `localhost:5432` | `apexdev_db` |
+
+En el **primer arranque**, PostgreSQL ejecuta automáticamente `01_init.sql` y `02_procesos.sql` (montados en `/docker-entrypoint-initdb.d`), creando el esquema, los datos semilla y los triggers.
+
+### Comandos útiles
+
+```bash
+docker compose logs -f backend      # Ver logs del backend
+docker compose logs -f db           # Ver logs de la base de datos
+docker compose restart backend      # Reiniciar un servicio
+docker compose down                 # Detener contenedores (conserva los datos)
+docker compose down -v              # Detener y BORRAR la base de datos
+docker compose up -d --build        # Reconstruir tras cambiar dependencias
+
+# Entrar a la base de datos
+docker exec -it apexdev_db psql -U admin -d gestion_proyectos
+```
+
+> **Importante:** los scripts SQL solo se ejecutan cuando el volumen `pgdata` está vacío. Si modificás `01_init.sql` o `02_procesos.sql`, hay que recrear la BD con `docker compose down -v && docker compose up -d --build`.
+
+### Sin Docker (manual)
+
+```bash
+# 1. Base de datos
+createdb -U postgres gestion_proyectos
+psql -U postgres -d gestion_proyectos -f backend/config/01_init.sql
+psql -U postgres -d gestion_proyectos -f backend/config/02_procesos.sql
+
+# 2. Backend
+cd backend
+cp ../.env.example .env          # y cambiar DB_HOST=localhost
+npm install
+npm run dev                      # http://localhost:3000
+
+# 3. Frontend (en otra terminal)
+cd frontend
+npm install
+npm run dev                      # http://localhost:5173
+```
+
+---
+
+## 5. Variables de entorno
+
+El backend lee su configuración con `dotenv`. Crear `backend/.env` (o copiar `.env.example`):
+
+```env
+# Servidor
 PORT=3000
 
-# Configuración de Base de Datos (PostgreSQL en Docker)
+# Base de datos (PostgreSQL)
 DB_USER=admin
 DB_PASSWORD=adminpassword
-DB_HOST=db
+DB_HOST=db              # "db" con Docker  |  "localhost" sin Docker
 DB_PORT=5432
 DB_NAME=gestion_proyectos
-'''
+```
+
+
+
+| Variable | Descripción | Valor por defecto |
+|---|---|---|
+| `PORT` | Puerto de la API | `3000` |
+| `DB_USER` | Usuario de PostgreSQL | `admin` |
+| `DB_PASSWORD` | Contraseña de PostgreSQL | `adminpassword` |
+| `DB_HOST` | Host de la BD (`db` = nombre del servicio en Docker) | `db` |
+| `DB_PORT` | Puerto de PostgreSQL | `5432` |
+| `DB_NAME` | Nombre de la base de datos | `gestion_proyectos` |
+
+Notas:
+
+- Con Docker, `docker-compose.yml` ya inyecta estas variables al backend, por lo que el `.env` solo hace falta para correr **sin Docker**.
+- El usuario/contraseña/BD de Postgres también están definidos en el servicio `db` del compose (`POSTGRES_USER`, `POSTGRES_PASSWORD`, `POSTGRES_DB`). Si los cambiás, cambialos en los dos lados.
+- El frontend tiene la URL de la API fija (`http://localhost:3000`) en las vistas.
+- **Nunca subas `.env` al repositorio** (agregalo al `.gitignore`).
+
+---
+
+## 6. Módulos y rutas del frontend
+
+| Ruta | Vista | Descripción |
+|---|---|---|
+| `/login` | LoginView | Inicio de sesión |
+| `/` | DashboardView | Panel según el rol (admin / gerente / empleado) |
+| `/proyectos` | ProyectosView | Gestión de proyectos |
+| `/empleados` | EmpleadosView | Directorio de RR. HH. |
+| `/clientes` | ClientesView | Directorio de clientes |
+| `/recursos` | RecursosView | Inventario de recursos materiales |
+| `/reportes` | ReportesView | Reportes (costos, avance, nómina) con export PDF/Excel |
+| `/equipo` | EquipoView | Asignación de miembros y tareas por proyecto |
+| `/tareas` | TareasView | Tablero de tareas y comentarios |
+| `/registrar-horas` | RegistrarHorasView | Registro de avance/horas |
+| `/registros` | RegistrosView | Historial de registros |
+| `/alertas` | AlertasView | Notificaciones |
+| `/perfil` | PerfilView | Perfil, contraseña y foto |
+
+## 7. API REST (backend)
+
+Prefijo base: `http://localhost:3000/api`
+
+| Recurso | Ruta base | Operaciones principales |
+|---|---|---|
+| Auth | `/login` | `POST /login` |
+| Dashboard | `/dashboard` | `GET /admin`, `/gerente/:id`, `/empleado/:id` |
+| Proyectos | `/proyectos` | CRUD + `PUT /:id/estado` + `/utilidades/proyectos`, `/utilidades/empleados` |
+| Equipo | `/equipo` | `GET /:id_proyecto`, `POST /`, `DELETE /:id_proyecto/:id_usuario`, CRUD de tareas por proyecto |
+| Tareas | `/tareas` | `GET /tablero/:id_proyecto`, `PATCH /:id_tarea/estado`, comentarios |
+| Avances | `/avances` | Registro de avance por tarea |
+| Clientes | `/clientes` | CRUD |
+| Empleados | `/empleados` | CRUD |
+| Recursos | `/recursos` | CRUD + recursos por proyecto (`/:id_proyecto/recursos`) |
+| Reportes | `/reportes` | `/costos`, `/avance`, `/financiero-view`, `/cronograma-view`, `/nomina` |
+| Alertas | `/alertas` | `GET /usuario/:id`, `PATCH /usuario/:id/leer` |
+| Registros | `/registros` | Historial de horas |
+| Usuario | `/usuario` | `GET /perfil/:id`, `PUT /perfil`, `PUT /password`, `POST /upload-foto` |
+| Archivos | `/uploads/*` | Fotos de perfil (estático) |
+| Diagnóstico | `/test-db` | Comprueba conexión a la BD |
+
+---
+
+## 8. Usuarios de prueba
+
+Los datos semilla incluyen un usuario por rol. Los correos y contraseñas están en `credenciales.txt`:
+
+| Rol | Correo |
+|---|---|
+| Admin | `r.alarcon@apexdev.bo` |
+| Gerente | `a.soliz@apexdev.bo` |
+| Empleado | `m.castro@apexdev.bo` |
+
+---
+
+## 9. Solución de problemas
+
+| Problema | Solución |
+|---|---|
+| `Error de conexión a la BD` al iniciar el backend | Postgres aún está arrancando. Esperá unos segundos o corré `docker compose restart backend`. |
+| Cambié el SQL y no se refleja | Recrear volumen: `docker compose down -v && docker compose up -d --build`. |
+| Puerto 5432 / 3000 / 5173 ocupado | Detené el servicio que lo usa o cambiá el mapeo de puertos en `docker-compose.yml`. |
+| Error de módulos nativos (bcrypt) en local | Borrá `node_modules` y reinstalá: `rm -rf node_modules && npm install`. |
+| El frontend no recarga cambios en Docker | Ya está configurado `usePolling` en `vite.config.js`; verificá que el volumen `./frontend:/app` esté montado. |
+| Fotos de perfil no aparecen | Verificá que exista `backend/uploads/` y que el volumen esté montado. |
+
+---
+
+## 10. Puntos a mejorar (antes de producción)
+
+- **Autenticación:** el login compara la contraseña en texto plano contra `password_hash`; `bcrypt` está instalado pero no se usa. No hay JWT/sesiones ni middleware de autorización por rol en la API.
+- **Secretos:** las credenciales de la BD están fijas en `docker-compose.yml` y `credenciales.txt` está versionado. Mover todo a `.env` y excluirlo del repo.
+- **URL de la API** fija en el frontend: usar `import.meta.env.VITE_API_URL`.
+- **Docker:** los Dockerfiles corren en modo desarrollo (`npm run dev`); para producción usar `vite build` + Nginx y `node server.js`.
+- **Código duplicado:** `avance.routes.js` / `avances.routes.js` y rutas de proyectos importadas dos veces en `server.js`; `models/` vacío.
+- **CORS** abierto a cualquier origen.
