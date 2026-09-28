@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # ==========================================
+  # BASE DE DATOS (PostgreSQL)
+  # ==========================================
+  db:
+    image: postgres:15-alpine
+    container_name: apexdev_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: adminpassword
+      POSTGRES_DB: gestion_proyectos
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./backend/config:/docker-entrypoint-initdb.d
+      - pgdata:/var/lib/postgresql/data
+
+  # ==========================================
+  # BACKEND (Node.js + Express)
+  # ==========================================
+  backend:
+    build: ./backend
+    container_name: apexdev_backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - DB_USER=admin
+      - DB_PASSWORD=adminpassword
+      - DB_NAME=gestion_proyectos
+      - DB_PORT=5432
+      - DB_HOST=db
+    volumes:
+      - ./backend:/app                 # Sincroniza tu código fuente en tiempo real
+      - /app/node_modules              # EL ESCUDO: Protege las dependencias de Linux
+      - ./backend/uploads:/app/uploads # Conserva las fotos de perfil de los usuarios
+    depends_on:
+      - db
+
+  # ==========================================
+  # FRONTEND (Vue.js + Vite)
+  # ==========================================
+  frontend:
+    build: ./frontend
+    container_name: apexdev_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app                # Sincroniza tu código fuente en tiempo real
+      - /app/node_modules              # EL ESCUDO: Protege las dependencias de Linux
+    depends_on:
+      - backend
+
+volumes:
+  pgdata:

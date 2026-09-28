@@ -1,0 +1,2 @@
+Para iniciar el proyecto en consola ejecute:
+docker compose up -d --build

@@ -1,0 +1,29 @@
+Credenciales para el login
+
+user admin:
+
+Correo:
+r.alarcon@apexdev.bo
+
+Contraseña:
+pass_seguro_1
+
+///////////////////////////////
+
+user gerente:
+
+Correo:
+a.soliz@apexdev.bo
+
+Contraseña:
+gerente_123 
+
+//////////////////////////////
+
+user empleado:
+
+Correo:
+m.castro@apexdev.bo
+
+Contraseña:
+emp_pass_1
