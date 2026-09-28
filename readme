@@ -1,63 +1,65 @@
 <div align="center">
 
-# 🚀 ApexDev — Sistema de Gestión de Proyectos Empresariales
+# 🚀 ApexDev
 
-**Plataforma web para administrar proyectos, tareas, equipos, clientes, recursos y reportes en una empresa de desarrollo.**
+**Sistema de Gestión de Proyectos Empresariales**
 
-![Vue](https://img.shields.io/badge/Vue-3-42b883?logo=vuedotjs&logoColor=white)
-![Vite](https://img.shields.io/badge/Vite-8-646cff?logo=vite&logoColor=white)
-![Node](https://img.shields.io/badge/Node.js-Express-339933?logo=nodedotjs&logoColor=white)
-![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-4169e1?logo=postgresql&logoColor=white)
-![Docker](https://img.shields.io/badge/Docker-Compose-2496ed?logo=docker&logoColor=white)
+*Plataforma web integral para administrar proyectos, tareas, equipos, clientes, recursos y reportes en empresas de desarrollo.*
+
+![Vue](https://img.shields.io/badge/Vue.js-35495E?style=for-the-badge&logo=vue.js&logoColor=4FC08D)
+![Vite](https://img.shields.io/badge/Vite-B73BFE?style=for-the-badge&logo=vite&logoColor=FFD62E)
+![Node.js](https://img.shields.io/badge/Node.js-43853D?style=for-the-badge&logo=node.js&logoColor=white)
+![Express.js](https://img.shields.io/badge/Express.js-404D59?style=for-the-badge)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2CA5E0?style=for-the-badge&logo=docker&logoColor=white)
 
 </div>
 
----
+<br />
 
-## 📑 Tabla de contenidos
+## 📑 Tabla de Contenidos
 
-- [Características](#-características)
-- [Stack tecnológico](#-stack-tecnológico)
-- [Arquitectura](#-arquitectura)
-- [Estructura del proyecto](#-estructura-del-proyecto)
-- [Inicio rápido](#-inicio-rápido)
-- [Variables de entorno](#-variables-de-entorno)
-- [Instalación manual (sin Docker)](#-instalación-manual-sin-docker)
-- [Roles y módulos](#-roles-y-módulos)
-- [API REST](#-api-rest)
-- [Base de datos](#-base-de-datos)
-- [Solución de problemas](#-solución-de-problemas)
-- [Roadmap](#-roadmap)
+- [✨ Características](#-características)
+- [🛠 Stack Tecnológico](#-stack-tecnológico)
+- [🏗 Arquitectura](#-arquitectura)
+- [🚀 Inicio Rápido](#-inicio-rápido)
+- [⚙️ Configuración y Entorno](#️-configuración-y-entorno)
+- [🗂 Estructura del Proyecto](#-estructura-del-proyecto)
+- [🔌 API REST y Base de Datos](#-api-rest-y-base-de-datos)
+- [🩹 Solución de Problemas](#-solución-de-problemas)
+- [🗺 Roadmap](#-roadmap)
 
 ---
 
 ## ✨ Características
 
-- 👥 **Tres roles** (`admin`, `gerente`, `empleado`) con dashboard propio para cada uno.
-- 📁 **Gestión de proyectos**: creación, estados, presupuesto, cronograma y clientes asociados.
-- ✅ **Tablero de tareas** con dependencias, comentarios e historial de cambios de estado.
-- 🧑‍🤝‍🧑 **Asignación de equipos** con control automático de sobreasignación de horas.
-- 🧰 **Inventario de recursos materiales** asociados a proyectos.
-- 📊 **Reportes** de costos, avance, cronograma y nómina, con **exportación a PDF y Excel**.
-- 🔔 **Alertas automáticas** (presupuesto excedido, tareas retrasadas, nuevas asignaciones).
-- 👤 **Perfil de usuario** con cambio de contraseña y foto.
+- 👥 **Control de Accesos (Roles):** Dashboards personalizados para `admin`, `gerente` y `empleado`.
+- 📁 **Gestión de Proyectos:** Control total sobre creación, estados, presupuestos, cronogramas y clientes asociados.
+- ✅ **Tablero Kanban de Tareas:** Gestión de dependencias, comentarios e historial detallado de cambios de estado.
+- 🧑‍🤝‍🧑 **Gestión de Equipos:** Asignación inteligente con control automático de sobreasignación de horas.
+- 🧰 **Inventario Integrado:** Asignación y seguimiento de recursos materiales por proyecto.
+- 📊 **Reportes Avanzados:** Análisis de costos, avance de proyectos, cronogramas y nóminas. **Exportación nativa a PDF y Excel**.
+- 🔔 **Sistema de Alertas:** Notificaciones automáticas por presupuesto excedido, tareas retrasadas y nuevas asignaciones.
+- 👤 **Perfiles de Usuario:** Gestión de cuenta, actualización de contraseña y avatares.
 
 ---
 
-## 🛠 Stack tecnológico
+## 🛠 Stack Tecnológico
 
-| Capa | Tecnología |
-|---|---|
+| Capa | Tecnologías Clave |
+| :--- | :--- |
 | **Frontend** | Vue 3, Vue Router 4, Vite 8, Chart.js |
 | **Exportación** | jsPDF, jsPDF-AutoTable, SheetJS (`xlsx`) |
 | **Backend** | Node.js 18, Express 4, Multer, dotenv, cors, bcrypt |
-| **Base de datos** | PostgreSQL 15 (funciones, procedimientos, vistas y triggers PL/pgSQL) |
-| **Infraestructura** | Docker y Docker Compose |
-| **Desarrollo** | nodemon (hot reload en backend), Vite HMR (frontend) |
+| **Base de Datos** | PostgreSQL 15 (PL/pgSQL: funciones, procedimientos, triggers) |
+| **Infraestructura** | Docker, Docker Compose |
+| **Dev Tools** | nodemon (hot reload API), Vite HMR (frontend) |
 
 ---
 
 ## 🏗 Arquitectura
+
+La lógica de negocio pesada (dashboards, reportes, alertas, auditoría) reside directamente en la base de datos mediante funciones y triggers, optimizando el rendimiento. La API de Node actúa como capa de exposición.
 
 ```mermaid
 flowchart LR
@@ -65,229 +67,187 @@ flowchart LR
     F -->|REST :3000| B[Backend<br/>Node + Express]
     B -->|pg| D[(PostgreSQL 15)]
     B --> UP[/uploads<br/>fotos de perfil/]
-    D -.->|triggers y funciones| D
-```
+    D -.->|Triggers y SPs| D
 
-La lógica de negocio pesada (dashboards, reportes, alertas, auditoría) vive en la base de datos como funciones y triggers; la API se encarga de exponerla.
-
----
-
-## 📂 Estructura del proyecto
-
-```
-.
-├── docker-compose.yml          # Orquesta db + backend + frontend
-├── .env.example                # Plantilla de variables de entorno
-├── README.md
-│
-├── backend/                    # API REST
-│   ├── Dockerfile
-│   ├── package.json
-│   ├── server.js               # Punto de entrada
-│   ├── config/
-│   │   ├── db.js               # Pool de conexión a PostgreSQL
-│   │   ├── 01_init.sql         # Esquema + datos semilla
-│   │   └── 02_procesos.sql     # Funciones, SPs, vistas y triggers
-│   ├── controllers/            # Lógica por módulo
-│   ├── routes/                 # Endpoints por módulo
-│   └── uploads/                # Fotos de perfil
-│
-└── frontend/                   # SPA
-    ├── Dockerfile
-    ├── package.json
-    ├── vite.config.js
-    └── src/
-        ├── main.js
-        ├── App.vue
-        ├── router/             # Rutas y guardas de sesión
-        ├── components/         # Sidebar, Topbar
-        ├── assets/css/
-        └── views/              # Una vista por módulo
 ```
 
 ---
 
-## ⚡ Inicio rápido
+## 🚀 Inicio Rápido
 
-### Requisitos
+### Prerrequisitos
 
-- [Docker](https://docs.docker.com/get-docker/) 20+ con Docker Compose v2
-- [Git](https://git-scm.com/)
+* [Docker](https://docs.docker.com/get-docker/?utm_source=gemini) (v20+) con Docker Compose v2
+* [Git](https://git-scm.com/?utm_source=gemini)
 
-### Pasos
+### Despliegue con Docker
 
+1. **Clonar el repositorio**
 ```bash
-# 1. Clonar el repositorio
-git clone https://github.com/<tu-usuario>/<tu-repo>.git
-cd <tu-repo>
+git clone [https://github.com/tu-usuario/apexdev.git](https://github.com/tu-usuario/apexdev.git)
+cd apexdev
 
-# 2. Levantar todos los servicios
+```
+
+
+2. **Levantar los servicios**
+```bash
 docker compose up -d --build
+
 ```
 
-Cuando termine:
 
-| Servicio | URL |
-|---|---|
-| 🖥 Frontend | http://localhost:5173 |
-| ⚙️ API | http://localhost:3000 |
-| 🩺 Health check (API + BD) | http://localhost:3000/api/test-db |
-| 🐘 PostgreSQL | `localhost:5432` |
 
-En el primer arranque, PostgreSQL ejecuta automáticamente `01_init.sql` y `02_procesos.sql`, que crean el esquema, los datos de ejemplo y los triggers.
+> [!NOTE]
+> En el primer arranque, PostgreSQL ejecuta automáticamente los scripts de inicialización (`01_init.sql` y `02_procesos.sql`), creando el esquema, los triggers y los datos semilla (usuarios de prueba incluidos).
 
-### Comandos útiles
+### Accesos Rápidos
+
+| Servicio | URL Local |
+| --- | --- |
+| 🖥 **Frontend** | [http://localhost:5173](http://localhost:5173?utm_source=gemini) |
+| ⚙️ **API REST** | [http://localhost:3000](http://localhost:3000?utm_source=gemini) |
+| 🩺 **Health Check** | [http://localhost:3000/api/test-db](http://localhost:3000/api/test-db?utm_source=gemini) |
+| 🐘 **PostgreSQL** | `localhost:5432` |
 
 ```bash
-docker compose logs -f backend     # Logs del backend
-docker compose restart backend     # Reiniciar un servicio
-docker compose down                # Detener (conserva los datos)
-docker compose down -v             # Detener y borrar la base de datos
-docker exec -it apexdev_db psql -U admin -d gestion_proyectos   # Consola SQL
-```
+# Ver logs del backend en tiempo real
+docker compose logs -f backend
 
-> ⚠️ Los scripts SQL solo se ejecutan si el volumen `pgdata` está vacío. Si los modificás, recreá la base con `docker compose down -v && docker compose up -d --build`.
+# Reiniciar la API
+docker compose restart backend
+
+# Detener servicios (conservando la base de datos)
+docker compose down
+
+# Detener y destruir la base de datos (para recrear desde cero)
+docker compose down -v
+
+# Acceder a la consola SQL
+docker exec -it apexdev_db psql -U admin -d gestion_proyectos
+
+```
 
 ---
 
-## 🔐 Variables de entorno
+## ⚙️ Configuración y Entorno
 
-Copiá la plantilla y ajustá los valores:
+Para entornos locales sin Docker o para modificar credenciales, copia la plantilla de variables de entorno:
 
 ```bash
 cp .env.example backend/.env
+
 ```
+
+**Ejemplo de `.env`:**
 
 ```env
 PORT=3000
-
 DB_USER=admin
 DB_PASSWORD=adminpassword
-DB_HOST=db              # "db" con Docker | "localhost" sin Docker
+DB_HOST=db              # Usa "localhost" si corres sin Docker
 DB_PORT=5432
 DB_NAME=gestion_proyectos
+
 ```
 
-| Variable | Descripción | Default |
-|---|---|---|
-| `PORT` | Puerto de la API | `3000` |
-| `DB_USER` | Usuario de PostgreSQL | `admin` |
-| `DB_PASSWORD` | Contraseña de PostgreSQL | `adminpassword` |
-| `DB_HOST` | Host de la BD (`db` = servicio de Docker) | `db` |
-| `DB_PORT` | Puerto de PostgreSQL | `5432` |
-| `DB_NAME` | Nombre de la base de datos | `gestion_proyectos` |
+> [!WARNING]
+> Cambia las credenciales por defecto antes de realizar cualquier despliegue en un entorno de producción.
 
-> Con Docker, el `docker-compose.yml` ya inyecta estas variables al backend; el `.env` es necesario solo al correr sin Docker.
-> ⚠️ **Cambiá las credenciales por defecto** antes de desplegar en cualquier entorno real.
-
----
-
-## 🧑‍💻 Instalación manual (sin Docker)
-
-**Requisitos:** Node.js 22.12+ (Vite 8), PostgreSQL 15, npm.
+Requiere Node.js 22.12+, PostgreSQL 15 y npm.
 
 ```bash
-# 1. Base de datos
+# 1. Preparar Base de datos
 createdb -U postgres gestion_proyectos
 psql -U postgres -d gestion_proyectos -f backend/config/01_init.sql
 psql -U postgres -d gestion_proyectos -f backend/config/02_procesos.sql
 
-# 2. Backend
+# 2. Iniciar Backend
 cd backend
-cp ../.env.example .env        # cambiar DB_HOST=localhost
+cp ../.env.example .env  # Asegúrate de cambiar DB_HOST=localhost
 npm install
 npm run dev
 
-# 3. Frontend (otra terminal)
+# 3. Iniciar Frontend (en otra terminal)
 cd frontend
 npm install
 npm run dev
+
 ```
 
 ---
 
-## 👥 Roles y módulos
+## 🗂 Estructura del Proyecto
 
-| Ruta | Módulo | Descripción |
-|---|---|---|
-| `/login` | Login | Inicio de sesión |
-| `/` | Dashboard | Panel según el rol |
-| `/proyectos` | Proyectos | Gestión de proyectos |
-| `/empleados` | Empleados | Directorio de RR. HH. |
-| `/clientes` | Clientes | Directorio de clientes |
-| `/recursos` | Recursos | Inventario de recursos materiales |
-| `/reportes` | Reportes | Costos, avance, nómina; export PDF/Excel |
-| `/equipo` | Equipo | Asignación de miembros y tareas |
-| `/tareas` | Tareas | Tablero y comentarios |
-| `/registrar-horas` | Registrar horas | Registro de avance |
-| `/registros` | Registros | Historial |
-| `/alertas` | Alertas | Notificaciones |
-| `/perfil` | Perfil | Datos, contraseña y foto |
+```text
+.
+├── docker-compose.yml          # Orquestación de contenedores
+├── .env.example                # Plantilla de variables de entorno
+├── README.md
+│
+├── backend/                    # ⚙️ API REST (Node/Express)
+│   ├── Dockerfile
+│   ├── server.js               # Punto de entrada
+│   ├── config/
+│   │   ├── db.js               # Pool de conexión PostgreSQL
+│   │   ├── 01_init.sql         # Esquema + datos semilla
+│   │   └── 02_procesos.sql     # Funciones, SPs, vistas y triggers PL/pgSQL
+│   ├── controllers/            # Controladores de lógica de negocio
+│   ├── routes/                 # Definición de Endpoints
+│   └── uploads/                # Almacenamiento local (Fotos de perfil)
+│
+└── frontend/                   # 🖥 SPA (Vue 3/Vite)
+    ├── Dockerfile
+    ├── vite.config.js
+    └── src/
+        ├── router/             # Rutas y guardas de navegación
+        ├── components/         # Componentes UI reutilizables
+        └── views/              # Vistas principales por módulo
 
-**Usuarios de ejemplo:** los datos semilla de `backend/config/01_init.sql` incluyen un usuario por cada rol (admin, gerente y empleado) para probar la aplicación.
-
----
-
-## 🔌 API REST
-
-Base URL: `http://localhost:3000/api`
-
-| Recurso | Ruta base | Operaciones principales |
-|---|---|---|
-| Auth | `/login` | `POST /login` |
-| Dashboard | `/dashboard` | `GET /admin`, `/gerente/:id`, `/empleado/:id` |
-| Proyectos | `/proyectos` | CRUD, `PUT /:id/estado`, `/utilidades/*` |
-| Equipo | `/equipo` | Miembros y tareas por proyecto |
-| Tareas | `/tareas` | `GET /tablero/:id_proyecto`, `PATCH /:id_tarea/estado`, comentarios |
-| Avances | `/avances` | Registro de avance |
-| Clientes | `/clientes` | CRUD |
-| Empleados | `/empleados` | CRUD |
-| Recursos | `/recursos` | CRUD y recursos por proyecto |
-| Reportes | `/reportes` | `/costos`, `/avance`, `/financiero-view`, `/cronograma-view`, `/nomina` |
-| Alertas | `/alertas` | `GET /usuario/:id`, `PATCH /usuario/:id/leer` |
-| Registros | `/registros` | Historial de horas |
-| Usuario | `/usuario` | `GET /perfil/:id`, `PUT /perfil`, `PUT /password`, `POST /upload-foto` |
+```
 
 ---
 
-## 🗄 Base de datos
+## 🔌 API REST y Base de Datos
 
-**Tablas:** `USUARIO`, `CLIENTE`, `RECURSO_MATERIAL`, `PROYECTO`, `TAREA`, `ES_MIEMBRO`, `DEPENDE`, `REGISTRO_AVANCE`, `UTILIZA`, `COMENTARIO`, `NOTIFICACION`, `HISTORIAL_ESTADO`.
+### Base de Datos Centralizada
 
-**Lógica en la BD:**
+El sistema delega la lógica crítica a la base de datos para garantizar integridad:
 
-- **Funciones:** dashboards por rol, listado de proyectos y equipo, reportes de costos, avance y nómina.
-- **Procedimiento:** `sp_crear_proyecto`.
-- **Vistas:** `vw_reporte_financiero`, `vw_reporte_cronograma_tareas`.
-- **Triggers:** sincronización de avance, auditoría de estados, alerta de presupuesto, alerta de retraso, control de sobreasignación y notificación de asignaciones.
+* **Vistas:** `vw_reporte_financiero`, `vw_reporte_cronograma_tareas`.
+* **Triggers Automatizados:** Sincronización de avances, auditoría de estados de tareas, alertas de presupuesto/retraso, control estricto de sobreasignación.
+
+### Endpoints Principales (`/api`)
+
+| Módulo | Rutas Destacadas |
+| --- | --- |
+| **Auth & Usuarios** | `POST /login`, `GET /usuario/perfil/:id`, `PUT /usuario/password` |
+| **Dashboards** | `GET /dashboard/admin`, `/dashboard/gerente/:id`, `/dashboard/empleado/:id` |
+| **Proyectos & Tareas** | `CRUD /proyectos`, `PATCH /tareas/:id_tarea/estado`, `GET /tareas/tablero/:id` |
+| **Reportes** | `GET /reportes/costos`, `/reportes/avance`, `/reportes/nomina` |
+| **Operativa** | `CRUD /empleados`, `CRUD /clientes`, `CRUD /recursos`, `GET /alertas/usuario/:id` |
 
 ---
 
-## 🩹 Solución de problemas
+## 🩹 Solución de Problemas
 
-| Problema | Solución |
-|---|---|
-| `Error de conexión a la BD` al iniciar | Postgres aún está arrancando; esperá unos segundos o `docker compose restart backend`. |
-| Cambié el SQL y no se refleja | `docker compose down -v && docker compose up -d --build`. |
-| Puerto 3000, 5173 o 5432 ocupado | Liberá el puerto o cambiá el mapeo en `docker-compose.yml`. |
-| Error con `bcrypt` en local | `rm -rf node_modules && npm install`. |
-| El frontend no recarga en Docker | Verificá el volumen `./frontend:/app` (ya hay `usePolling` en `vite.config.js`). |
+| Síntoma | Solución Recomendada |
+| --- | --- |
+| **Error de conexión a la BD al iniciar** | PostgreSQL tarda unos segundos en levantar. Espera un momento o ejecuta `docker compose restart backend`. |
+| **Los cambios SQL no se reflejan** | Ejecuta `docker compose down -v && docker compose up -d --build` para purgar el volumen y recrear la base. |
+| **Puertos 3000, 5173 o 5432 ocupados** | Libera el puerto en tu máquina host o cambia el mapeo de puertos en el archivo `docker-compose.yml`. |
+| **Error con `bcrypt` en local** | Borra los módulos y reinstala: `rm -rf node_modules && npm install`. |
+| **Frontend no hace Hot-Reload en Docker** | Verifica que el volumen `./frontend:/app` esté montado (el `usePolling` ya está configurado en `vite.config.js`). |
 
 ---
 
 ## 🗺 Roadmap
 
-- [ ] Autenticación con JWT y hash de contraseñas con `bcrypt`
-- [ ] Middleware de autorización por rol en la API
-- [ ] Configurar la URL de la API con `VITE_API_URL`
-- [ ] Imágenes Docker de producción (`vite build` + Nginx)
-- [ ] Restringir CORS
-- [ ] Tests automatizados
+* [ ] Implementar autenticación robusta con JWT y hash via `bcrypt`.
+* [ ] Desarrollar middleware de autorización estricta por roles en la API.
+* [ ] Configuración dinámica de la URL base con `VITE_API_URL`.
+* [ ] Creación de imágenes Docker optimizadas para producción (`vite build` + Nginx).
+* [ ] Restricción y configuración avanzada de CORS.
+* [ ] Implementación de suite de tests automatizados (Jest / Cypress).
 
 ---
-
-<div align="center">
-
-Hecho con ❤️ como proyecto académico · **ApexDev**
-
-</div>
